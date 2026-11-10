@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Công cụ tính tuổi online - Age Calculator</title>
+    <meta name="description"
+        content="Công cụ tính tuổi online miễn phí. Tính chính xác số tuổi theo năm, tháng, ngày và xem ngày sinh nhật tiếp theo.">
+    <meta name="keywords" content="Age Calculator, công cụ tính tuổi, tính tuổi online">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            font-family: Roboto, sans-serif;
+        }
+
+        body {
+            background: #f7f8fa;
+        }
+
+        .card {
+            background: white;
+            border: 1px solid #e5e7eb;
+            border-radius: 14px;
+        }
+
+        .field {
+            width: 100%;
+            padding: 13px;
+            border: 1px solid #dfe3e8;
+            border-radius: 9px;
+            outline: none;
+        }
+
+        .field:focus {
+            border-color: #eab308;
+            box-shadow: 0 0 0 3px #fef3c7;
+        }
+
+        .primary-btn {
+            background: #facc15;
+            padding: 12px 18px;
+            border-radius: 9px;
+            font-weight: 600;
+            transition: .2s;
+        }
+
+        .primary-btn:hover {
+            background: #eab308;
+        }
+
+        .stat {
+            background: #fffbeb;
+            border: 1px solid #fde68a;
+            border-radius: 10px;
+            padding: 16px 8px;
+            text-align: center;
+        }
+    </style>
+</head>
+
+<body class="text-gray-800">
+    <main class="max-w-2xl mx-auto px-4 py-10">
+
+        <div class="text-center mb-7">
+            <span class="inline-block bg-yellow-100 text-yellow-800 px-3 py-1 rounded-full text-xs font-semibold mb-3">
+                CÔNG CỤ MIỄN PHÍ
+            </span>
+            <h1 class="text-2xl md:text-3xl font-bold mb-2">Công cụ tính tuổi</h1>
+            <p class="text-gray-500 text-sm">
+                Tính tuổi chính xác theo năm, tháng và ngày chỉ trong vài giây.
+            </p>
+        </div>
+
+        <section class="card p-5 md:p-6">
+            <label for="birthDate" class="block text-sm font-semibold mb-2">
+                Ngày tháng năm sinh của bạn
+            </label>
+
+            <input type="date" id="birthDate" class="field">
+
+            <p id="error" class="hidden text-red-500 text-sm mt-3"></p>
+
+            <button onclick="calculateAge()" class="primary-btn w-full mt-5">
+                Tính tuổi ngay
+            </button>
+        </section>
+
+        <section id="result" class="hidden mt-5">
+            <div class="card p-5 md:p-6">
+                <h2 class="font-bold text-lg mb-2">Kết quả tính tuổi</h2>
+                <p class="text-sm text-gray-500 mb-5" id="birthInfo"></p>
+
+                <div class="grid grid-cols-3 gap-3">
+                    <div class="stat">
+                        <p id="years" class="text-3xl font-bold text-yellow-700">0</p>
+                        <p class="text-sm text-gray-500 mt-1">Năm</p>
+                    </div>
+                    <div class="stat">
+                        <p id="months" class="text-3xl font-bold text-yellow-700">0</p>
+                        <p class="text-sm text-gray-500 mt-1">Tháng</p>
+                    </div>
+                    <div class="stat">
+                        <p id="days" class="text-3xl font-bold text-yellow-700">0</p>
+                        <p class="text-sm text-gray-500 mt-1">Ngày</p>
+                    </div>
+                </div>
+
+                <div class="bg-gray-50 rounded-xl p-4 mt-5">
+                    <p class="text-sm text-gray-500 mb-1">Tổng số ngày đã sống</p>
+                    <p id="totalDays" class="font-bold text-xl">0 ngày</p>
+                </div>
+
+                <div class="bg-gray-50 rounded-xl p-4 mt-3">
+                    <p class="text-sm text-gray-500 mb-1">Sinh nhật tiếp theo</p>
+                    <p id="nextBirthday" class="font-semibold">--</p>
+                    <p id="countdown" class="text-sm text-yellow-700 mt-1"></p>
+                </div>
+
+                <button onclick="copyResult()"
+                    class="w-full border border-gray-200 rounded-lg py-3 mt-5 text-sm font-semibold hover:bg-gray-50">
+                    Sao chép kết quả
+                </button>
+            </div>
+        </section>
+
+        <section class="card p-5 md:p-6 mt-5">
+            <h2 class="font-bold text-lg mb-3">Cách sử dụng</h2>
+            <div class="space-y-3 text-sm text-gray-600">
+                <p><strong class="text-gray-800">1.</strong> Chọn ngày, tháng và năm sinh.</p>
+                <p><strong class="text-gray-800">2.</strong> Nhấn nút Tính tuổi ngay.</p>
+                <p><strong class="text-gray-800">3.</strong> Xem kết quả tuổi theo năm, tháng, ngày.</p>
+                <p><strong class="text-gray-800">4.</strong> Sao chép kết quả nếu cần sử dụng.</p>
+            </div>
+        </section>
+
+        <footer class="text-center text-xs text-gray-400 mt-7">
+            Age Calculator – Công cụ tính tuổi trực tuyến miễn phí
+        </footer>
+    </main>
+
+    <script>
+        let resultText = '';
+
+        function dateToString(date) {
+            const day = String(date.getDate()).padStart(2, '0');
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            return `${day}/${month}/${date.getFullYear()}`;
+        }
+
+        function daysInMonth(year, month) {
+            return new Date(year, month + 1, 0).getDate();
+        }
+
+        function calculateAge() {
+            const input = document.getElementById('birthDate');
+            const error = document.getElementById('error');
+            const result = document.getElementById('result');
+
+            error.classList.add('hidden');
+            result.classList.add('hidden');
+
+            if (!input.value) {
+                showError('Vui lòng chọn ngày tháng năm sinh.');
+                return;
+            }
+
+            const [year, month, day] = input.value.split('-').map(Number);
+            const birth = new Date(year, month - 1, day);
+            const today = new Date();
+
+            today.setHours(0, 0, 0, 0);
+
+            if (
+                birth.getFullYear() !== year ||
+                birth.getMonth() !== month - 1 ||
+                birth.getDate() !== day
+            ) {
+                showError('Ngày sinh không hợp lệ.');
+                return;
+            }
+
+            if (birth > today) {
+                showError('Ngày sinh không được lớn hơn ngày hiện tại.');
+                return;
+            }
+
+            let years = today.getFullYear() - year;
+            let months = today.getMonth() - (month - 1);
+            let days = today.getDate() - day;
+
+            if (days < 0) {
+                months--;
+                const previousMonth = new Date(
+                    today.getFullYear(),
+                    today.getMonth(),
+                    0
+                );
+                days += previousMonth.getDate();
+            }
+
+            if (months < 0) {
+                years--;
+                months += 12;
+            }
+
+            const totalDays = Math.floor(
+                (today - birth) / (1000 * 60 * 60 * 24)
+            );
+
+            let nextYear = today.getFullYear();
+            let nextDate = new Date(nextYear, month - 1, day);
+
+            if (nextDate < today) {
+                nextYear++;
+                nextDate = new Date(nextYear, month - 1, day);
+            }
+
+            const nextMonthDays = daysInMonth(nextYear, month - 1);
+            nextDate = new Date(
+                nextYear,
+                month - 1,
+                Math.min(day, nextMonthDays)
+            );
+
+            const daysUntil = Math.round(
+                (nextDate - today) / (1000 * 60 * 60 * 24)
+            );
+
+            document.getElementById('years').textContent = years;
+            document.getElementById('months').textContent = months;
+            document.getElementById('days').textContent = days;
+            document.getElementById('totalDays').textContent =
+                totalDays.toLocaleString('vi-VN') + ' ngày';
+
+            document.getElementById('birthInfo').textContent =
+                'Ngày sinh: ' + dateToString(birth);
+
+            document.getElementById('nextBirthday').textContent =
+                dateToString(nextDate);
+
+            document.getElementById('countdown').textContent =
+                daysUntil === 0
+                    ? 'Hôm nay là sinh nhật của bạn!'
+                    : `Còn ${daysUntil} ngày nữa đến sinh nhật.`;
+
+            resultText =
+                `KẾT QUẢ TÍNH TUỔI\n` +
+                `Ngày sinh: ${dateToString(birth)}\n` +
+                `Tuổi: ${years} năm, ${months} tháng, ${days} ngày\n` +
+                `Tổng số ngày đã sống: ${totalDays} ngày\n` +
+                `Sinh nhật tiếp theo: ${dateToString(nextDate)}\n` +
+                `Còn ${daysUntil} ngày đến sinh nhật.`;
+
+            result.classList.remove('hidden');
+        }
+
+        function showError(message) {
+            const error = document.getElementById('error');
+            error.textContent = message;
+            error.classList.remove('hidden');
+        }
+
+        function copyResult() {
+            if (!resultText) {
+                alert('Bạn chưa tính tuổi!');
+                return;
+            }
+
+            gbCopy(resultText);
+        }
+
+        function gbCopy(text) {
+            const area = document.createElement('textarea');
+            area.value = text;
+            area.style.position = 'fixed';
+            area.style.opacity = '0';
+            document.body.appendChild(area);
+            area.select();
+
+            try {
+                document.execCommand('copy');
+                alert('Đã sao chép kết quả!');
+            } catch {
+                alert('Không thể sao chép kết quả.');
+            }
+
+            area.remove();
+        }
+
+        function gbDownload(filename, content) {
+            const blob = new Blob([content], {
+                type: 'text/plain;charset=utf-8'
+            });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = filename;
+            link.click();
+            URL.revokeObjectURL(url);
+        }
+    </script>
+</body>
+
+</html>
